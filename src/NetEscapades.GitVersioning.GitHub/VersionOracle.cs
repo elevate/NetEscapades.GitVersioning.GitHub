@@ -58,6 +58,10 @@ namespace NetEscapades.GitVersioning.GitHub
             };
 
             var workingVersion = VersionFile.GetVersion(projectPath, out var actualDirectory);
+            if (actualDirectory is null)
+            {
+                throw new Exception($"Could not find version file in {projectPath}");
+            }
             
             var absoluteJsonFilePath = Path.Combine(actualDirectory, VersionFile.JsonFileName);
             var relativeJsonFilePath = PathHelpers.GetRelativePath(absoluteJsonFilePath, projectPath); 
