@@ -33,8 +33,7 @@ namespace NetEscapades.GitVersioning.GitHub
         [FileOrDirectoryExists]
         public string ProjectPath { get; }
 
-        [Required(ErrorMessage = "The GitHub login is required", AllowEmptyStrings = false)]
-        [Option("-l|--login", CommandOptionType.SingleValue, Description = "The GitHub login for the user. Required.")]
+        [Option("-l|--login", CommandOptionType.SingleValue, Description = "The GitHub login for the user.")]
         public string GitHubLogin { get; }
 
         [Required(ErrorMessage = "The GitHub password is required", AllowEmptyStrings = false)]
@@ -55,7 +54,7 @@ namespace NetEscapades.GitVersioning.GitHub
         {
             var github = new GitHubClient(new Octokit.ProductHeaderValue(Constants.AppName))
             {
-                Credentials = new Credentials(GitHubLogin, GitHubPassword),
+                Credentials = string.IsNullOrWhiteSpace(GitHubLogin) ?  new Credentials(GitHubPassword) : new Credentials(GitHubLogin, GitHubPassword),
             };
 
             var workingVersion = VersionFile.GetVersion(projectPath, out var actualDirectory);
