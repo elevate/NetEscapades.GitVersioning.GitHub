@@ -307,7 +307,7 @@ namespace NetEscapades.GitVersioning.GitHub
             {
                 Converters = new JsonConverter[]
                 {
-                    new VersionConverter(),
+                    new Newtonsoft.Json.Converters.VersionConverter(),
                     new SemanticVersionJsonConverter(),
                     new AssemblyVersionOptionsConverter(includeDefaults),
                     new StringEnumConverter() {NamingStrategy = new CamelCaseNamingStrategy()},
