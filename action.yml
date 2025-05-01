@@ -1,0 +1,48 @@
+name: GitVersioning
+description: Generates version information from Git.
+inputs:
+  owner:
+    description: The owner of the repository.
+    required: true
+  repo:
+    description: The name of the repository.
+    required: true
+  commit:
+    description: The SHA of the current commit.
+    required: true
+  project_path:
+    description: Path to the project containining version.txt / version.json
+    required: true
+  accesstoken:
+    description: The GitHub access token.
+    required: true
+outputs:
+  version:
+    description: The generated version.
+    value: ${{ steps.gitversioning.outputs.version }}
+runs:
+  using: "composite"
+  steps:
+    - name: Remove CodeBuild global.json
+      run: rm /codebuild/global.json || true
+      shell: bash
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4.3.1
+      with:
+        dotnet-version: '8.x'
+    - name: Install dependencies
+      run: dotnet restore
+      shell: bash
+      working-directory: ${{ github.action_path }}
+    - name: Build
+      run: dotnet build --configuration Release
+      shell: bash
+      working-directory: ${{ github.action_path }}
+    - name: Run GitVersioning
+      id: gitversioning
+      run: |
+        version_file=$(mktemp)
+        dotnet run --no-build --no-restore --project ${{ github.action_path }}/src/NetEscapades.GitVersioning.GitHub --configuration Release -- ${{ inputs.owner }} ${{ inputs.repo }} ${{ inputs.commit }} --project ${{ inputs.project_path }} --accesstoken ${{ inputs.accesstoken }} >> $version_file
+        echo "version=$(cat $version_file | grep -oP '(^Version:)\K.*' | xargs)" >> $GITHUB_OUTPUT
+      shell: bash
+      working-directory: ${{ github.action_path }}
